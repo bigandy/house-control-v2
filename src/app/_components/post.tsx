@@ -7,8 +7,13 @@ import { api } from "~/trpc/react";
 export function LatestPost() {
   const [latestPost] = api.post.getLatest.useSuspenseQuery();
 
+  const [message] = api.post.getSecretMessage.useSuspenseQuery();
+
+  console.log({ message });
+
   const utils = api.useUtils();
   const [name, setName] = useState("");
+
   const createPost = api.post.create.useMutation({
     onSuccess: async () => {
       await utils.post.invalidate();
@@ -18,6 +23,7 @@ export function LatestPost() {
 
   return (
     <div className="w-full max-w-xs">
+      <h2>{message}</h2>
       {latestPost ? (
         <p className="truncate">Your most recent post: {latestPost.name}</p>
       ) : (
