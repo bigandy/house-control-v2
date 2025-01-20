@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 
-const Button = ({ children, ...attrs }) => {
+const Button = ({ children, active, ...attrs }) => {
   return (
     <button
-      className="mr-4 rounded-md border bg-black p-4 px-5 text-sm font-semibold leading-5 text-white hover:bg-white hover:text-black"
+      className={`mr-4 rounded-md border bg-black p-4 px-5 text-sm font-semibold leading-5 text-white transition-colors duration-1000 hover:bg-white hover:text-black ${active ? "bg-blue-400" : ""}`}
       {...attrs}
     >
       {children}
@@ -47,8 +47,18 @@ export function PlayControls() {
 
   return (
     <div className="w-full">
-      <Button onClick={() => playMusic.mutate()}>Play Music</Button>
-      <Button onClick={() => pauseMusic.mutate()}>Pause Music</Button>
+      <Button
+        onClick={() => playMusic.mutate()}
+        active={playerState?.state === "stream"}
+      >
+        Play Music
+      </Button>
+      <Button
+        onClick={() => pauseMusic.mutate()}
+        active={playerState?.state !== "stream"}
+      >
+        Pause Music
+      </Button>
       <Button onClick={() => getStatus.mutate()}>Get Player Status</Button>
 
       {playerState &&
