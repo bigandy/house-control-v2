@@ -1,49 +1,51 @@
-// import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
-import {
-  createTRPCRouter,
-  //   protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
-// import { posts } from "~/server/db/schema";
+import { XMLParser } from "fast-xml-parser";
+
+const getStateFromFetch = async (slug: string): Promise<any> => {
+  const response = await fetch(`http://192.168.1.86:11000/${slug}`);
+
+  const xmlString: string = (await response.text()).replaceAll("\n", "");
+
+  const parser = new XMLParser();
+  const xml = parser.parse(xmlString);
+
+  return xml;
+};
 
 export const musicRouter = createTRPCRouter({
-  play: publicProcedure
-    // .input(z.object({ text: z.string() }))
-    .mutation(async ({}) => {
-      await fetch("http://192.168.1.86:11000/Play");
-      return {
-        status: "success",
-      };
-    }),
+  play: publicProcedure.mutation(async () => {
+    const { state, ...rest } = await getStateFromFetch("Play");
 
-  pause: publicProcedure
-    // .input(z.object({ text: z.string() }))
-    .mutation(async ({}) => {
-      await fetch("http://192.168.1.86:11000/Pause");
-      return {
-        status: "success",
-      };
-    }),
+    console.log({ state, rest });
 
-  //   create: protectedProcedure
-  //     .input(z.object({ name: z.string().min(1) }))
-  //     .mutation(async ({ ctx, input }) => {
-  //       await ctx.db.insert(posts).values({
-  //         name: input.name,
-  //         createdById: ctx.session.user.id,
-  //       });
-  //     }),
+    // let jObj = parser.parse(xmlString);
+    return {
+      status: "success",
+      playerState: state,
+    };
+  }),
 
-  //   getLatest: protectedProcedure.query(async ({ ctx }) => {
-  //     const post = await ctx.db.query.posts.findFirst({
-  //       orderBy: (posts, { desc }) => [desc(posts.createdAt)],
-  //     });
+  pause: publicProcedure.mutation(async ({}) => {
+    const { state, ...rest } = await getStateFromFetch("Pause");
 
-  //     return post ?? null;
-  //   }),
+    console.log({ state, rest });
 
-  //   getSecretMessage: protectedProcedure.query(() => {
-  //     return "you can now see this secret message!";
-  //   }),
+    // let jObj = parser.parse(xmlString);
+    return {
+      status: "success",
+      playerState: state,
+    };
+  }),
+
+  getStatus: publicProcedure.mutation(async ({}) => {
+    const { status } = await getStateFromFetch("Status");
+
+    // let jObj = parser.parse(xmlString);
+    console.log({ status });
+    return {
+      status: "success",
+      playerState: status,
+    };
+  }),
 });
